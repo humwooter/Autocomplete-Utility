@@ -1,0 +1,659 @@
+#include "trie.hpp"
+
+#include <algorithm>
+#include <cctype>
+#include <stack>
+#include <utility>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstring>
+
+using namespace std; 
+int main() {
+  Trie* test = new Trie();
+  test->check("======,---- - ");
+  test->insert("-- - - --------");
+  test->insert(""); 
+  test->insert("========,==========================");
+    test->insert("exposed");
+    test->insert("exp");
+  
+  test->insert("WORD ON THE STREET"); 
+  cout << test->firstWithPrefix("", 0) << endl;
+  // cout << test->firstWithPrefix("sn") << endl;
+  //test->insert("numberless");
+  //cout << test->firstWithPrefix("num") << endl;
+
+
+
+  //cout << test->firstWithPrefix("", 0) << endl;                                   
+
+
+
+  return 0; 
+}
+// int main() {
+//   //Trie test = new Trie();
+//   //Trie* test2 = new Trie();
+//   //Trie test2 = load_trie("test.txt");
+//   //Trie *ptr = &test2;
+
+//   //cout << &test2 << " " << ptr << endl; ////
+//   //cout << ptr->check("gorbinson") << endl;
+//   //cout << ptr->firstWithPrefix("gorb") << endl; 
+//   Trie tree = load_trie("given_dict.txt");
+//   Trie *test = &tree; 
+//   //Trie *ptr = &test2; 
+
+
+//   test->insert("shelter");
+//   test->insert("transport");
+//   test->insert("suit");
+//   test->insert("quixotic");
+//   test->insert("judicious");
+//   test->insert("grumpy");
+//   test->insert("cream");
+//   test->insert("crown");
+//   test->insert("maid");
+//   test->insert("arm");
+
+//   test->insert("apple");
+//   test->insert("banana");
+//   test->insert("olive piccolo"); 
+//   cout << test->check("apple") << endl;
+//   cout << test->check("butter") << endl;
+//      cout << test->check("icky") << endl;
+//   cout << test->check("banana") << endl;
+//   cout << test->check("apple") << endl;
+//   cout << test->check("olive pi-ccolo") << endl;
+
+//   cout << test->check("shelter") << endl;
+//   cout << test->check("transport") << endl;
+//   cout << test->check("suit") << endl;
+//   cout << test->check("quixotic") << endl;
+//   cout << test->check("crown") << endl;
+
+
+
+//   cout << test->firstWithPrefix("q", 0) << endl;
+//   cout << test->firstWithPrefix("butt", 0) << endl;
+  
+//   //load_trie( "given_dict.txt" ); 
+
+
+
+
+
+
+
+
+
+//   return 0; 
+// }
+
+Trie::Trie():end_of_word(false){
+
+
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+      this->roots[i] = NULL;
+
+  }
+
+    // cout << "initialized trie to null" << endl; 
+}
+
+
+Trie::Trie(Trie const& other):end_of_word(other.end_of_word){ //this is wrong, should check every character for roots on the outermost level and go fully into each one that exists
+  //this->roots = other->roots;
+
+  if (other.end_of_word == true) {
+    //cout << "reached end initialization constructor" << endl; 
+    this->end_of_word = true;
+    return; 
+
+    }
+
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+    if (other.roots[i] != nullptr) {
+      this->roots[i] = new Trie(*other.roots[i]);
+      // this->roots[i] = other.roots[i]; //recursion 
+
+    }
+    else {
+      this->roots[i] = nullptr; 
+
+    }
+
+  }
+  //return;
+
+}
+
+
+Trie::~Trie(){
+
+  
+
+  //std::array<Trie*, ALPHABET_SIZE> roots = this->roots;
+
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+      delete this->roots[i];
+   
+  }
+}
+
+
+
+Trie& Trie::operator=(Trie const& other){
+  if (this == &other) {
+    return *this; 
+
+  }
+
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+    delete this->roots[i];
+
+  }
+  
+
+   for (int i = 0; i < ALPHABET_SIZE; i++) {
+    if (other.roots[i] != nullptr) {
+      this->roots[i] = other.roots[i];
+
+    }
+    else {
+      this->roots[i] == nullptr; 
+    }
+
+  }
+  return *this;
+}
+
+
+
+
+
+
+
+void Trie::insert(char const* const str){
+  char currentChar = *str;
+  //string cleanedString = "";
+  int realStringLength = 0; 
+  //cout << strlen(str) << " " ; 
+  //cout << "entered insert " << currentChar << endl;////
+  // for (int i = 0; i < strlen(str); i++) {
+  //     if (isalpha(str[i]) != 0) {
+  // 	realStringLength ++; 
+  //       }
+  //   }
+  if (str == NULL){ //|| (isalpha(currentChar) == 0 && (str+1) == NULL) || strlen(str) == 0) {
+    //cout << "it worked" << endl; ////
+    return;
+  }
+  
+  if (currentChar == '\0') {
+     cout << str << endl; 
+    this->end_of_word = true;
+    return;
+
+  }
+
+
+
+  // char currentChar = *str;
+  if (isalpha(currentChar)) {
+    int currentIndex = tolower(currentChar) - 'a';
+    if (this->roots[currentIndex] == nullptr) {
+      this->roots[currentIndex] = new Trie();
+      this->roots[currentIndex]->insert(str+1);
+    }
+    else {
+      this->roots[currentIndex]->insert(str+1);
+    }
+
+  }
+  else {
+    this->insert(str+1);
+  }
+  //cout << currentChar << " " << str << 
+  // if (str == NULL) {
+  //   return;
+  // }
+
+  // if (currentChar == '\0') {
+  //   this->end_of_word = true;
+  //   return; 
+
+  // }
+  
+  // if ((isalpha(currentChar) == 0)) {
+  //   this->insert(str+1);
+  // }
+
+  // if (this->roots[currentIndex] == nullptr) {
+  //   this->roots[currentIndex] = new Trie();
+  //   this->roots[currentIndex]->insert(str+1);
+  //  }
+  // else {
+  //   this->roots[currentIndex]->insert(str+1);
+  // }
+}
+     
+
+//   char currentChar;
+//   //int lengthWord = 0;
+//   string cleanedWord = "";
+//   // if (strlen(str) == 0) {
+//   //   return; 
+//   // }
+
+  
+
+//   for (int i = 0; i < strlen(str); i++) {
+//     if (isalpha(str[i]) != 0) {
+//       //  lengthWord ++;
+//       cleanedWord += tolower(str[i]);
+//     }
+//   }
+
+//   if (cleanedWord.length() == 0 || str == NULL) {
+//     //cout << "not today buddy" << endl; 
+//     return; 
+
+//   }
+  
+//   //cout << "cleaned word: " <<  cleanedWord << endl; ////                                                                                                                                                    
+
+//   //int count = 0;
+
+//   //cout << "entered check 1 insert" << endl;
+//   Trie* current = const_cast<Trie*>(this);
+
+//   for (int currentIndex = 0; currentIndex < cleanedWord.length(); currentIndex++) {
+
+//     currentChar = cleanedWord[currentIndex];
+//     int indexTrie = currentChar - 'a';
+
+//     //cout << currentChar << " " << indexTrie << " " << current->end_of_word << " " << current <<  endl;//this                                                                                                  
+
+//     if (current->roots[indexTrie] == nullptr) {
+//       //xxcout << current << endl; ////
+//       current->roots[indexTrie] = new Trie();
+//       //cout << current << " " << currentChar <<  endl; ////   
+//       current = current->roots[indexTrie];
+//       //cout << current << " " << currentChar <<  endl; ////
+//       if (cleanedWord[currentIndex+1] == '\0' || currentIndex == cleanedWord.length()-1) {
+// 	current->end_of_word = true;
+// 	//cout << current << " " << current->end_of_word << endl;
+// 	//cout << cleanedWord << endl; ////                                                                                                                                                                  
+// 	break;
+//       }
+       
+//        continue; 
+//     }
+//     if (current->roots[indexTrie] != nullptr) {
+//       //cout << "character already exists 
+//       current = current->roots[indexTrie];
+//       continue;
+//     }
+//   }
+// }
+
+
+
+
+bool Trie::check(char const* const str) const{
+  
+  //char currentChar;
+  //xint lengthWord = 0;
+  // if (strlen(str) == 0) {
+  //   return false; 
+  // }
+  if (str == nullptr) {
+    return false;
+  }
+
+  char currentChar = *str;
+  int currentIndex = currentChar - 'a';
+  if (currentChar == '\0') {
+    return this->end_of_word; 
+  }
+  if (this->roots[currentIndex] == nullptr) {
+    return false;
+      }
+  else {
+    return this->roots[currentIndex]->check(str+1);
+  }
+
+}
+
+  
+//   string cleanedWord = "";
+ 
+
+//   for (int i = 0; i < strlen(str); i++) {
+//     if (isalpha(str[i]) != 0) {
+//       //lengthWord ++;
+//       cleanedWord += tolower(str[i]);
+//     }
+//   }
+
+//   if (str == NULL || cleanedWord.length() == 0) {
+//     //cout << " nope" << endl; ////
+//     return false; 
+//   }
+//   //cout << "cleaned word: " <<  cleanedWord << endl; ////
+
+//   int count = 0;
+
+//   //cout << "entered check 1" << endl;
+//   Trie* current = const_cast<Trie*>(this);
+//   //cout << current << endl; ////
+//   //cout << current << " " << current->end_of_word << endl; ////    
+//   for (int currentIndex = 0; currentIndex < cleanedWord.length(); currentIndex++) {
+//     // while (isalpha(str[currentIndex]) == 0) {
+//     //   currentIndex += 1; 
+
+//     // }
+//     //cout << current << " " << current->end_of_word << endl; ////    
+    
+//     currentChar = cleanedWord[currentIndex];
+//     int indexTrie = currentChar - 'a';
+
+//     //cout << currentChar << " " << indexTrie << " " << current->end_of_word << " " << current <<  endl;////
+//     if (current->end_of_word == true && currentIndex == cleanedWord.length()-1) {
+//       //cout << "word was found!:)" << endl;	
+//     return true;
+
+//     }
+
+//     if (current->roots[indexTrie] == nullptr) {
+//       //cout <<"word not in tri: " << cleanedWord << endl; ////
+//       //cout << indexTrie << " " << current->roots[indexTrie] << " " << current << endl; 
+//       return false; 
+//     }
+
+//     else {
+//       //cout << "this character was in the trie: " << currentChar << endl; ////
+//       current = current->roots[indexTrie];
+
+//       if (current->end_of_word == true && currentIndex == cleanedWord.length()-1) {
+// 	//cout << "word was found!:)  :" << current <<  endl;
+// 	return true;
+//       }
+//       //cout << current << endl; 
+       
+//       continue; 
+
+//     }
+
+//   }
+//   return current->end_of_word; 
+//   //return true; 
+// }
+
+
+
+
+char* Trie::firstWithPrefix(char const* const str,unsigned depth) const{
+  char currentChar;
+  //int lengthWord = 0;                                                                                                                                                                                                                       
+  string cleanedPrefix = "";
+  string finalWord = "";
+  Trie* current = const_cast<Trie*>(this);
+  char letters[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+  cout << current->end_of_word << " " << endl; ////
+
+  // if (strlen(str) == 0) {
+  //   for (int i = 0; i < ALPHABET_SIZE; i++) {
+  //     if (current->roots[i] != nullptr) {
+  // 	finalWord += letters[i];
+  // 	current = current->roots[i];
+  // 	i = -1;
+  // 	continue; 
+
+  //     }
+  //     if (current->end_of_word == true) {
+  // 	cout << finalWord << " test worked " << endl; ////
+  // 	char * cStringPointer = new char[finalWord.length()+1];
+
+  // 	for (int i = 0; i < finalWord.length(); i++) {
+  // 	  cStringPointer[i] = finalWord[i];
+  // 	}
+  // 	cStringPointer[finalWord.length()] = '\0';
+  // 	//cout << *cStringPointer << endl; ////                                                                                                                                                                                                                                                                                                                                 
+  // 	return cStringPointer;
+
+  //     }
+
+  //   }
+  //   return nullptr; 
+  // }
+  //  cout << "reached prefix" << endl;////
+  for (int i = 0; i < strlen(str); i++) {
+    if (isalpha(str[i]) != 0) {
+      //  lengthWord ++;                                                                                                                                                                                                                      
+      cleanedPrefix += tolower(str[i]);
+    }
+  }
+  
+
+  if (cleanedPrefix.length() == 0 || str == NULL) {
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+      if (current->roots[i] != nullptr) {
+	cout << letters[i] << endl; ////
+        finalWord += letters[i];
+        current = current->roots[i];
+        i = -1;
+        continue;
+
+      }
+      //cout << finalWord << endl; 
+      if (current->end_of_word == true) {
+        cout << finalWord << " test worked " << endl; ////                                                                                                                                                  
+        char * cStringPointer = new char[finalWord.length()+1];
+
+        for (int i = 0; i < finalWord.length(); i++) {
+          cStringPointer[i] = finalWord[i];
+        }
+        cStringPointer[finalWord.length()] = '\0';
+        //cout << *cStringPointer << endl; ////	\
+                                                                                                                                                                                                         
+        return cStringPointer;
+
+      }
+
+    }
+    return nullptr;
+  }
+
+  //cout << "cleaned prefix: " <<  cleanedPrefix << endl; ////                                                                                                                                                                                      
+
+  //int count = 0;
+
+  //cout << "entered check 1 insert" << endl;
+  // Trie* current = const_cast<Trie*>(this);
+
+  for (int currentIndex = 0; currentIndex < cleanedPrefix.length(); currentIndex++) {
+    currentChar = cleanedPrefix[currentIndex];
+    int indexTrie = currentChar - 'a';
+
+    if (current->roots[indexTrie] == nullptr) {
+      //cout << "prefix not in word" << endl;                                                                                                                                                                                                                                                                                                                             
+      return NULL;
+
+    }
+
+
+    //cout << currentChar << " " << indexTrie << " " << current->end_of_word << " " << current <<  endl;////
+    if (cleanedPrefix[currentIndex+1] == '\0' || currentIndex == cleanedPrefix.length()-1) {
+      //current->end_of_word = true;
+      finalWord += currentChar;
+      current = current->roots[indexTrie];
+      //cout << "end of prefix has been reached, final word is: " << finalWord <<  endl;
+      break;
+
+    }
+
+    // if (current->roots[indexTrie] == nullptr) {
+    //   //cout << "prefix not in word" << endl;
+    //   return NULL; 
+
+    // }
+
+    else {
+      //cout << "character already exists, moving to next character " << current << endl;
+      finalWord += currentChar; 
+      current = current->roots[indexTrie];
+
+      continue;
+    }
+  }
+
+  //now finding the rest of the word the prefix belongs to:
+  //cout << endl << endl; ////
+  //char letters[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+  //cout << currentChar << " " << current << endl; //checking where trie is it (should be at end of prefix)
+  while (current->end_of_word != true ) {
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+
+      currentChar = letters[i];
+      int indexTrie = i;
+    
+      if (current->roots[i] != nullptr) {
+	//cout << currentChar << " " << current << " " << indexTrie << endl; //checking where trie is it (should be at end of prefix)              
+	finalWord += currentChar;
+	current = current->roots[indexTrie];
+	//cout << "current finalWord: " << finalWord << endl;
+	//cout << indexTrie << " " << letters[indexTrie] << endl; ////
+	//cout << current << " " << letters[i] <<  endl; ////
+	if (current->end_of_word != true) {
+	  break;
+	}
+
+      }	//}
+      if (current->end_of_word == true) {
+	//finalWord += letters[i];
+	//cout << currentChar << endl; 
+	//cout << "end of word has been reached" << endl; ////
+	//cout << "finalWord: " << finalWord << endl;
+	break; 
+
+      }
+    
+    }
+  
+  }
+  
+  //cout << "finished building final word" << endl << endl; 
+  char * cStringPointer = new char[finalWord.length()+1];
+
+  for (int i = 0; i < finalWord.length(); i++) {
+    cStringPointer[i] = finalWord[i]; 
+  }
+  cStringPointer[finalWord.length()] = '\0';
+  //cout << *cStringPointer << endl; ////
+  return cStringPointer;
+  
+  //return NULL; 
+}
+
+
+
+
+Trie load_trie(std::istream& is){
+  Trie current;
+  string input;
+  string cleanedWord = ""; 
+
+
+  while (getline(is, input)) {
+    for (int i = 0; i < input.length(); i++) {
+      if (isalpha(input[i]) != 0) {
+	  cleanedWord += tolower(input[i]); 
+	}
+
+    }
+      if (cleanedWord.length() != 0) {
+	current.insert(cleanedWord.c_str());
+	cleanedWord = "";
+      }
+
+  }
+  return current; 	//cout << input << endl; ////
+  
+}
+//return current;
+	
+//   //ifstream.open(is);
+//   //cout << "entered load_trie" << endl; ////
+
+//   int numWords = 0;
+//   char c;
+//   string word = "";
+//   char endChar = '\n'; 
+
+//   while (!is.eof()) {
+//     c = is.get();
+
+//     if (c == endChar) {
+//       numWords += 1; 
+
+//     }
+
+//   }
+
+//   is.clear();
+//   is.seekg(0);
+
+
+//   string words[numWords];
+
+//   int count = 0; 
+
+//   while(!is.eof()) {
+//     c = is.get();
+//     //cout << c << endl; 
+//     if (c != endChar) {
+//       word += c; 
+
+//     }
+//     else {
+//       //cout << word << endl; ////
+//       words[count] = word;
+//       //cout << words[count] << endl; ////
+//       count++; 
+//       word = ""; 
+
+//     }
+    
+//   }
+
+//   Trie* current = new Trie(); 
+
+//   for (int i = 0; i < numWords; i++) {
+//     string currentWord = words[i];
+//     char const* const currWordcString = currentWord.c_str();//check if this is legal
+//     //cout << "load trie check: " << currWordcString << endl; ////
+//       if (currWordcString[strlen(currWordcString)] == '\0') {
+//       }
+//       current->insert(currWordcString);
+
+//   }
+  
+//   return *current;
+// }
+
+
+
+Trie load_trie(std::string filename){
+  ifstream file;
+  file.open(filename);
+
+  Trie current = load_trie(file);
+
+  file.close();
+   
+    return current;
+}
